@@ -16,7 +16,7 @@ namespace SocketCommunication.Tests
         }
 
         [Fact]
-        public async Task Socket_Handshake_Request()
+        public void Socket_Handshake_Request()
         {
             HandshakeRequest reqTarget = new HandshakeRequest
             {

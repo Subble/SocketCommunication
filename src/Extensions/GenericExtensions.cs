@@ -8,7 +8,7 @@ namespace SocketCommunication.Extensions
     internal static class GenericExtensions
     {
         /// <summary>
-        /// Convert array to long, it must length 1, 2, 4 or 8
+        /// Convert array to long, it must have length 1, 2, 4 or 8
         /// </summary>
         /// <param name="maybeArray"></param>
         /// <returns></returns>

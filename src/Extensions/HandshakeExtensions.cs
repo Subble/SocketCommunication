@@ -56,9 +56,13 @@ namespace SocketCommunication.Extensions
         /// <returns></returns>
         public static async Task WriteSemVersion(this Stream stream, SemVersion version)
         {
-            await stream.WriteAsync(BitConverter.GetBytes(version.Major), SizeLength.INT);
-            await stream.WriteAsync(BitConverter.GetBytes(version.Minor), SizeLength.INT);
-            await stream.WriteAsync(BitConverter.GetBytes(version.Patch), SizeLength.INT);
+            var byteVersion = new byte[12];
+
+            BitConverter.GetBytes(version.Major).CopyTo(byteVersion, 0);
+            BitConverter.GetBytes(version.Minor).CopyTo(byteVersion, 4);
+            BitConverter.GetBytes(version.Patch).CopyTo(byteVersion, 8);
+
+            await stream.WriteAsync(byteVersion);
         }
     }
 }

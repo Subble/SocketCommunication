@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace SocketCommunication.Model
 {
-    internal enum SizeLength
+    /// <summary>
+    /// size to read from a byte array
+    /// </summary>
+    public enum SizeLength
     {
         BYTE = 1,
         SHORT = 2,

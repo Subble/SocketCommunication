@@ -19,7 +19,7 @@ namespace SocketCommunication.Extensions
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
-        public static async Task<Option<byte>> ReadByteAsync(this Stream stream)
+        internal static async Task<Option<byte>> ReadByteAsync(this Stream stream)
         {
             var data = await stream.ReadBytesAsync(1);
 
@@ -35,7 +35,7 @@ namespace SocketCommunication.Extensions
         /// <param name="stream">source stream to read</param>
         /// <param name="length">bytes length to read</param>
         /// <returns>if the length can be read, it has a value</returns>
-        public static async Task<Option<byte[]>>  ReadBytesAsync(this Stream stream, int length)
+        internal static async Task<Option<byte[]>>  ReadBytesAsync(this Stream stream, int length)
         {
             if (!stream.CanRead)
                 return None<byte[]>();
@@ -55,7 +55,7 @@ namespace SocketCommunication.Extensions
         /// <param name="stream"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static async Task<Option<byte[]>> ReadBytesAsync(this Stream stream, long length)
+        internal static async Task<Option<byte[]>> ReadBytesAsync(this Stream stream, long length)
         {
             if (!stream.CanRead)
                 return None<byte[]>();
@@ -69,7 +69,7 @@ namespace SocketCommunication.Extensions
 
             while (length > 0)
             {
-                var bufferSize = length > int.MaxValue ? int.MaxValue : (int)length;
+                const int bufferSize = 1024;
                 length -= bufferSize;
 
                 var readLength = await stream.ReadAsync(buffer, offset, bufferSize);
@@ -89,7 +89,7 @@ namespace SocketCommunication.Extensions
         /// <param name="stream"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static async Task<Option<byte[]>> ReadUnknonwBytesAsync(this Stream stream, SizeLength length)
+        internal static async Task<Option<byte[]>> ReadUnknonwBytesAsync(this Stream stream, SizeLength length)
         {
             var maybeBytesToRead = await stream.ReadBytesAsync((int)length);
 
@@ -105,7 +105,7 @@ namespace SocketCommunication.Extensions
         /// <param name="stream"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static async Task<Option<string>> ReadUnkownStringAsync(this Stream stream, SizeLength length)
+        internal static async Task<Option<string>> ReadUnkownStringAsync(this Stream stream, SizeLength length)
         {
             var maybeBytes = await stream.ReadUnknonwBytesAsync(length);
             if (!maybeBytes.HasValue(out var bytes))
@@ -121,7 +121,7 @@ namespace SocketCommunication.Extensions
         /// <param name="length"></param>
         /// <param name="separator"></param>
         /// <returns></returns>
-        public static async Task<Option<IEnumerable<string>>> ReadStringList(this Stream stream, SizeLength length, string separator)
+        internal static async Task<Option<IEnumerable<string>>> ReadStringList(this Stream stream, SizeLength length, string separator)
         {
             var rawString = await stream.ReadUnkownStringAsync(length);
             return rawString
@@ -134,7 +134,7 @@ namespace SocketCommunication.Extensions
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
-        public static async Task<byte[]> ReadToEnd(this Stream stream)
+        internal static async Task<byte[]> ReadToEnd(this Stream stream)
         {
             List<byte> list = new List<byte>();
 
@@ -158,7 +158,7 @@ namespace SocketCommunication.Extensions
         /// <param name="stream"></param>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static async Task WriteAsync(this Stream stream, byte[] buffer)
+        internal static async Task WriteAsync(this Stream stream, byte[] buffer)
         {
             await stream.WriteAsync(buffer, 0, buffer.Length);
         }
@@ -170,13 +170,13 @@ namespace SocketCommunication.Extensions
         /// <param name="buffer"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static async Task WriteAsync(this Stream stream, byte[] buffer, SizeLength length)
+        internal static async Task WriteAsync(this Stream stream, byte[] buffer, SizeLength length)
         {
             byte[] bytesLength;
             switch (length)
             {
                 case SizeLength.BYTE:
-                    bytesLength = BitConverter.GetBytes((byte)buffer.Length);
+                    bytesLength = new byte[] { (byte)buffer.Length };
                     break;
 
                 case SizeLength.SHORT:
@@ -207,7 +207,7 @@ namespace SocketCommunication.Extensions
         /// <param name="value"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static async Task WriteUTF8Async(this Stream stream, string value, SizeLength length)
+        internal static async Task WriteUTF8Async(this Stream stream, string value, SizeLength length)
         {
             await stream.WriteAsync(Encoding.UTF8.GetBytes(value), length);
         }
