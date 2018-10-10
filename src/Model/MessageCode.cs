@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SocketCommunication.Model
+﻿namespace SocketCommunication.Model
 {
     public enum MessageCode
     {

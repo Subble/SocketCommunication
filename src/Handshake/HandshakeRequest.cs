@@ -13,6 +13,11 @@ namespace SocketCommunication.Handshake
 {
     public class HandshakeRequest : IHandshakeMessage
     {
+        public HandshakeRequest()
+        {
+            RequestData = new byte[0];
+        }
+
         public MessageCode RequestCode { get; set; }
 
         public SemVersion Version { get; set; }
@@ -25,28 +30,31 @@ namespace SocketCommunication.Handshake
 
         public byte[] RequestData { get; set; }
 
-        public async Task<byte[]> ToByteArray()
+        public Task<byte[]> ToByteArray()
+            => ToByteArray(this);
+
+        public static async Task<byte[]> ToByteArray(IHandshakeMessage m)
         {
             using (var stream = new MemoryStream())
             {
 
                 // Request Code
-                await stream.WriteAsync(new[] { (byte)RequestCode });
+                await stream.WriteAsync(new[] { (byte)m.RequestCode });
 
-                await stream.WriteSemVersion(Version);
+                await stream.WriteSemVersion(m.Version);
 
-                await stream.WriteUTF8Async(ClientID, SizeLength.INT);
+                await stream.WriteUTF8Async(m.ClientID, SizeLength.INT);
 
                 const string separator = ";";
                 await stream.WriteUTF8Async(separator, SizeLength.INT);
 
-                string subscribeList = string.Join(separator, Subscribe);
-                string produceList = string.Join(separator, Produce);
+                string subscribeList = string.Join(separator, m.Subscribe);
+                string produceList = string.Join(separator, m.Produce);
 
                 await stream.WriteUTF8Async(subscribeList, SizeLength.INT);
                 await stream.WriteUTF8Async(produceList, SizeLength.INT);
 
-                await stream.WriteAsync(RequestData);
+                await stream.WriteAsync(m.RequestData);
 
                 return stream.ToArray();
             }
@@ -95,6 +103,31 @@ namespace SocketCommunication.Handshake
             });
         }
 
+
         private static Option<HandshakeRequest> Empty() => None<HandshakeRequest>();
+
+        public static bool Equals(IHandshakeMessage x, IHandshakeMessage y)
+        {
+            return x.ClientID == y.ClientID
+                && string.Join(";", x.Produce) == string.Join(";", y.Produce)
+                && string.Join(";", x.Subscribe) == string.Join(";", y.Subscribe)
+                && x.Version == y.Version
+                && x.RequestCode == y.RequestCode
+                && x.RequestData.EqualsContent(y.RequestData);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is IHandshakeMessage message)
+                return Equals(this, message);
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
     }
 }
